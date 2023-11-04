@@ -44,28 +44,31 @@ bool Quadtree::insert(double X, double Y)
 {
     if (this->new_leaf_LB != nullptr)
     {
-        half_X = (x0 + x1) / 2;
-        half_Y = (y0 + y1) / 2;
+        // half_X = (x0 + x1) / 2;
+        // half_Y = (y0 + y1) / 2;
 
-        if (X <= half_X && Y < half_Y)   // add data to left-bottom leaf
+        cout << "x0: " << x0 << "   y0: " << y0 << "     x1: " << x1 << "        y1: " << y1 << "    m: " << m << endl;
+        cout << "X: " << X << "     Y: " << Y << "     Xhalf: " << half_X << "     Yhalf: " << half_Y << endl;
+
+        if (X > half_X && Y > half_Y)   // add data to right-top leaf
         {
-            cout << "LB" << endl;
-            return this->new_leaf_LB->insert(X, Y);
-        }
-        else if (X <= x1 && Y < half_Y)   // add data to right-bottom leaf
-        {
-            cout << "RB" << endl;
-            return this->new_leaf_RB->insert(X, Y);
-        }
-        else if (X <= half_X && Y <= y1)   // add data to left-top leaf
+            cout << "RT" << endl;
+            return this->new_leaf_RT->insert(X, Y);
+        }  
+        else if (X <= half_X && Y >= half_Y)   // add data to left-top leaf
         {
             cout << "LT" << endl;
             return this->new_leaf_LT->insert(X, Y);
         }
-        else if (X <= x1 && Y <= y1)   // add data to right-top leaf
+        else if (X > half_X && Y < half_Y)   // add data to right-bottom leaf
         {
-            cout << "RT" << endl;
-            return this->new_leaf_RT->insert(X, Y);
+            cout << "RB" << endl;
+            return this->new_leaf_RB->insert(X, Y);
+        }
+        else    // add data to left-bottom leaf
+        {
+            cout << "LB" << endl;
+            return this->new_leaf_LB->insert(X, Y);
         }
     }
     else
@@ -99,16 +102,17 @@ bool Quadtree::insert(double X, double Y)
             // 1. Make the 4 new child nodes
             // 2. call insert on each of the points in the node
             // 3. delete the parent node
+            cout << "x0: " << x0 << "   y0: " << y0 << "     x1: " << x1 << "        y1: " << y1 << "    m: " << m << endl;
+            cout << "X: " << X << "     Y: " << Y << "     Xhalf: " << half_X << "     Yhalf: " << half_Y << endl;
             cout << "make 4 subranches" << endl;
-            this->new_leaf_LB = new Quadtree(m, x0, half_X, y0, half_Y);
-            this->new_leaf_RB = new Quadtree(m, half_X, x1, y0, half_Y);
-            this->new_leaf_LT = new Quadtree(m, x0, half_X, half_Y, y1);
-            this->new_leaf_RT = new Quadtree(m, half_X, x1, half_Y, y1);
+            this->new_leaf_LB = new Quadtree(m, x0, y0, half_X, half_Y);
+            this->new_leaf_RB = new Quadtree(m, half_X, y0, x1, half_Y);
+            this->new_leaf_LT = new Quadtree(m, x0, half_Y, half_X, y1);
+            this->new_leaf_RT = new Quadtree(m, half_X, half_Y, x1, y1);
 
             for (int i = 0; i < m; i++)
             {
                 cout << "moving old array to new" << endl;
-                //parent = dummy_new_parent;
                 this->insert(this->point_array[i].new_x, this->point_array[i].new_y);
             }
 
