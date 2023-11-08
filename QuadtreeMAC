@@ -31,6 +31,28 @@ Quadtree::Quadtree(int m, double x0, double y0, double x1, double y1)
 }
 //-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------//
 
+Quadtree::~Quadtree()
+{
+    hold = 0;
+    if (this->new_leaf_RT != nullptr || this->new_leaf_LT != nullptr || this->new_leaf_RB != nullptr || this->new_leaf_LB != nullptr)
+    {
+        this->new_leaf_LB->~Quadtree();
+        this->new_leaf_RB->~Quadtree();
+        this->new_leaf_LT->~Quadtree();
+        this->new_leaf_RT->~Quadtree();
+    }
+    else 
+    {
+        cout << "deleted array and leaves" << endl;
+        delete[] this->point_array;
+    }
+    delete this->new_leaf_LB;
+    delete this->new_leaf_RB;
+    delete this->new_leaf_LT;
+    delete this->new_leaf_RT;
+}
+//-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------//
+
 bool Quadtree::init(int x0, int y0, int x1, int y1)
 {
     if ( x0 < x1 && y0 < y1 )
@@ -164,8 +186,39 @@ bool Quadtree::search(double X, double Y, double d)
 // -------------------------  
 Point Quadtree::nearest(double X, double Y)
 {
-    Point nearest = Point(x1*2, y1*2);
-    if (new_leaf_LB == nullptr)
+    Point nearest = Point((this->x1*2),(this->y1*2));
+
+    
+    if (this->new_leaf_RT != nullptr || this->new_leaf_LT != nullptr || this->new_leaf_RB != nullptr || this->new_leaf_LB != nullptr)
+    {
+        Point LB = new_leaf_LB->nearest(X, Y);
+        Point RB = new_leaf_RB->nearest(X, Y);
+        Point LT = new_leaf_LT->nearest(X, Y);
+        Point RT = new_leaf_RT->nearest(X, Y);
+        Point closest1 = LB;
+        Point closest2 = RT;
+        Point closest;
+
+        if (closest1.new_x > RB.new_x && closest1.new_y > RB.new_y)
+        {
+            closest1 = RB;
+        }
+        if (closest2.new_x > LT.new_x && closest2.new_y > LT.new_y)
+        {
+            closest2 = LT;
+        }
+
+        if (closest2.new_x > closest1.new_x && closest2.new_y > closest1.new_y)
+        {
+            closest = closest1;
+        }
+        else 
+        {
+            closest = closest2;
+        }
+        return closest;
+    }
+    else
     {
         for (int i = 0; i < counter; i++)
         {
@@ -177,27 +230,14 @@ Point Quadtree::nearest(double X, double Y)
                     nearest.new_y = point_array[i].new_y;
                 }
             }
-            else if (abs((this->point_array[i].new_x - X)) < (nearest.new_x - X) && abs((this->point_array[i].new_y - Y)) < (nearest.new_y - Y))
+            else if (abs((this->point_array[i].new_x - X)) < abs((nearest.new_x - X)) && abs((this->point_array[i].new_y - Y)) < abs((nearest.new_y - Y)))
             {
                 nearest.new_x = point_array[i].new_x;
                 nearest.new_y = point_array[i].new_y;
             }
-            else
-            {
-                continue;
-            }
         }
-    }
-
-    else
-    {
-        new_leaf_LB->nearest(X, Y);
-        new_leaf_RB->nearest(X, Y);
-        new_leaf_LT->nearest(X, Y);
-        new_leaf_RT->nearest(X, Y);
-
         return nearest;
-    }    
+    }
 }
 //-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------//
 // range function definition
@@ -208,10 +248,10 @@ bool Quadtree::range(double xr0, double yr0, double xr1, double yr1)
     hold = 0;
     if (this->new_leaf_RT != nullptr || this->new_leaf_LT != nullptr || this->new_leaf_RB != nullptr || this->new_leaf_LB != nullptr)
     {
-        if (new_leaf_LB->range(xr0, yr0, xr1, yr1)) {hold++;}
-        if (new_leaf_RB->range(xr0, yr0, xr1, yr1)) {hold++;}
-        if (new_leaf_LT->range(xr0, yr0, xr1, yr1)) {hold++;}
-        if (new_leaf_RT->range(xr0, yr0, xr1, yr1)) {hold++;}
+        if (this->new_leaf_RT->range(xr0, yr0, xr1, yr1)) {hold++;}
+        if (this->new_leaf_LT->range(xr0, yr0, xr1, yr1)) {hold++;}
+        if (this->new_leaf_LB->range(xr0, yr0, xr1, yr1)) {hold++;}
+        if (this->new_leaf_RB->range(xr0, yr0, xr1, yr1)) {hold++;}
         
         //if (this->new_leaf_RT->range(xr0, yr0, xr1, yr1) || this->new_leaf_LT->range(xr0, yr0, xr1, yr1) || this->new_leaf_RB->range(xr0, yr0, xr1, yr1) || this->new_leaf_LB->range(xr0, yr0, xr1, yr1))
         if (hold > 0)
