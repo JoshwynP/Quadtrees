@@ -1,6 +1,7 @@
 #include <iostream>
 #include <string>
 #include <cmath>
+#include <stdexcept>
 #include "Quadtree.h"
 using namespace std;
 
@@ -13,12 +14,16 @@ Quadtree::Quadtree(int m, double x0, double y0, double x1, double y1)
     Quadtree* new_leaf_RB = nullptr;
     Quadtree* new_leaf_LT = nullptr;
     Quadtree* new_leaf_RT = nullptr;
-    
     this->m = m;
     this->x0 = x0;
     this->y0 = y0;
     this->x1 = x1;
     this->y1 = y1;
+    this->half_X = (x0 + x1) / 2;
+    this->half_Y = (y0 + y1) / 2;
+    this->counter = 0;
+    this->num_subtrees = 0;
+    this->hold = 0;
 
     point_array = new Point[m];
     for (int i = 0; i < m; i++)
@@ -26,16 +31,6 @@ Quadtree::Quadtree(int m, double x0, double y0, double x1, double y1)
         point_array[i].new_x = 0;
         point_array[i].new_y = 0;
     }
-
-    this->half_X = (x0 + x1) / 2;
-    this->half_Y = (y0 + y1) / 2;
-    
-    counter = 0;
-    num_subtrees = 0;
-    hold = 0;
-    
-
-    //cout << "new tree made" << endl;
 }
 //-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------//
 
@@ -70,6 +65,7 @@ bool Quadtree::init(int x0, int y0, int x1, int y1)
     else 
     {
         // exception thing
+        throw illegal_exception();
         return false;
     }
 }
@@ -283,3 +279,17 @@ bool Quadtree::range(double xr0, double yr0, double xr1, double yr1)
     }  
 }
 //-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------//
+// is in range function definition
+// -------------------------  
+bool Quadtree::is_in_range(double xr0, double yr0, double xr1, double yr1)
+{
+    if (xr0 >= this->x0 && xr1 <= this->x1 && yr0 >= this->y0 && yr1 <= this->y1 && xr0 < xr1 && yr0 < yr1)
+    {
+        return true;
+    }
+    else 
+    {
+        throw illegal_exception();
+        return false;
+    }
+}
