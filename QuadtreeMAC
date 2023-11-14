@@ -181,47 +181,22 @@ bool Quadtree::search(double X, double Y, double d)
 //-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------//
 // nearest function definition
 // -------------------------  
-Point Quadtree::nearest(double X, double Y)
-{
-    Point nearest = Point((this->x1*2),(this->y1*2));
-
-    
-    if (this->new_leaf_RT != nullptr || this->new_leaf_LT != nullptr || this->new_leaf_RB != nullptr || this->new_leaf_LB != nullptr)
+void Quadtree::nearest(double X, double Y, Point &nearest)
+{    
+    if (this->new_leaf_LB != nullptr) // if we are not at a leaf ndoe
     {
-        Point LB = new_leaf_LB->nearest(X, Y);
-        Point RB = new_leaf_RB->nearest(X, Y);
-        Point LT = new_leaf_LT->nearest(X, Y);
-        Point RT = new_leaf_RT->nearest(X, Y);
-        Point closest1 = LB;
-        Point closest2 = RT;
-        Point closest;
-
-        if (closest1.new_x > RB.new_x && closest1.new_y > RB.new_y)
-        {
-            closest1 = RB;
-        }
-        if (closest2.new_x > LT.new_x && closest2.new_y > LT.new_y)
-        {
-            closest2 = LT;
-        }
-
-        if (closest2.new_x > closest1.new_x && closest2.new_y > closest1.new_y)
-        {
-            closest = closest1;
-        }
-        else 
-        {
-            closest = closest2;
-        }
-        return closest;
+        new_leaf_LB->nearest(X, Y, nearest);
+        new_leaf_RB->nearest(X, Y, nearest);
+        new_leaf_LT->nearest(X, Y, nearest);
+        new_leaf_RT->nearest(X, Y, nearest);
     }
-    else
+    else // if we are at a leaf node
     {
         for (int i = 0; i < counter; i++)
         {
-            if (abs((this->point_array[i].new_x - X)) == (nearest.new_x - X) && abs((this->point_array[i].new_y - Y)) == (nearest.new_y - Y))
+            if (abs((this->point_array[i].new_x - X)) == abs((nearest.new_x - X)) && abs((this->point_array[i].new_y - Y)) == abs((nearest.new_y - Y)))
             {
-                if ((this->point_array[i].new_x > nearest.new_x && this->point_array[i].new_y > nearest.new_y) || this->point_array[i].new_x > nearest.new_x)
+                if (this->point_array[i].new_x > nearest.new_x)
                 {
                     nearest.new_x = point_array[i].new_x;
                     nearest.new_y = point_array[i].new_y;
@@ -233,7 +208,6 @@ Point Quadtree::nearest(double X, double Y)
                 nearest.new_y = point_array[i].new_y;
             }
         }
-        return nearest;
     }
 }
 //-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------//
