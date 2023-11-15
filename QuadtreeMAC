@@ -43,12 +43,10 @@ Quadtree::~Quadtree()
         delete this->new_leaf_RB;
         delete this->new_leaf_LT;
         delete this->new_leaf_RT;
-        //cout << "deleted the branches from parent" << endl;
     }
     // when we are at a leaf delete the point array
     if (this->point_array != nullptr)
     {
-        //cout << "deleting the point array" << endl;
         delete[] this->point_array;
         this->point_array = nullptr;
     }
@@ -77,27 +75,20 @@ bool Quadtree::insert(double X, double Y)
 {
     if (this->new_leaf_LB != nullptr)
     {
-        //cout << "x0: " << x0 << "   y0: " << y0 << "     x1: " << x1 << "        y1: " << y1 << "    m: " << m << endl;
-        //cout << "X: " << X << "     Y: " << Y << "     Xhalf: " << half_X << "     Yhalf: " << half_Y << endl;
-
         if (X > half_X && Y > half_Y)   // add data to right-top leaf
         {
-            //cout << "RT" << endl;
             return this->new_leaf_RT->insert(X, Y);
         }  
         else if (X <= half_X && Y >= half_Y)   // add data to left-top leaf
         {
-            //cout << "LT" << endl;
             return this->new_leaf_LT->insert(X, Y);
         }
         else if (X > half_X && Y < half_Y)   // add data to right-bottom leaf
         {
-            //cout << "RB" << endl;
             return this->new_leaf_RB->insert(X, Y);
         }
         else    // add data to left-bottom leaf
         {
-            //cout << "LB" << endl;
             return this->new_leaf_LB->insert(X, Y);
         }
     }
@@ -110,19 +101,15 @@ bool Quadtree::insert(double X, double Y)
         {
             if (this->point_array[i].new_x == X && this->point_array[i].new_y == Y)
             {
-                //cout << "duplicate" << endl;
                 return false;
             }
         }
         
         if (this->counter < m)
-        {   
-            //cout << "Inserting into the " << this->counter << " element in the array" << endl;
-    
+        {       
             //just insert into the array
             this->point_array[this->counter].new_x = X;
             this->point_array[this->counter].new_y = Y;
-            //cout << "New points: " << this->point_array[this->counter].new_x << "," << this->point_array[this->counter].new_y << endl;
             this->counter++;
             return true;
         }
@@ -157,12 +144,10 @@ bool Quadtree::search(double X, double Y, double d)
     {
         if (this->new_leaf_RT->search(X, Y, d) || this->new_leaf_LT->search(X, Y, d) || this->new_leaf_RB->search(X, Y, d) || this->new_leaf_LB->search(X, Y, d))
         {
-            cout << "returning true" << endl;
             return true;
         }
         else
         {
-            cout << "returning false" << endl;
             return false;
         }
     }
@@ -170,7 +155,7 @@ bool Quadtree::search(double X, double Y, double d)
     {
         for (int i = 0; i < counter; i++)
         {
-            if (abs((this->point_array[i].new_x - X)) < d && abs((this->point_array[i].new_y - Y)) < d)
+            if (distance (X, Y, this->point_array[i].new_x, this->point_array[i].new_y) < d)
             {
                 return true;
             }
@@ -181,7 +166,7 @@ bool Quadtree::search(double X, double Y, double d)
 //-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------//
 // nearest function definition
 // -------------------------  
-void Quadtree::nearest(double X, double Y, Point &nearest)
+void Quadtree::nearest(double X, double Y, Point *&nearest)
 {    
     if (this->new_leaf_LB != nullptr) // if we are not at a leaf ndoe
     {
@@ -194,18 +179,35 @@ void Quadtree::nearest(double X, double Y, Point &nearest)
     {
         for (int i = 0; i < counter; i++)
         {
-            if (abs((this->point_array[i].new_x - X)) == abs((nearest.new_x - X)) && abs((this->point_array[i].new_y - Y)) == abs((nearest.new_y - Y)))
+            // dist == prevdist
+            // x ==
+            // y < change it
+            // else: x < change it
+
+            // else if x < change it
+
+            if (nearest == nullptr)
             {
-                if (this->point_array[i].new_x > nearest.new_x)
+                nearest = &point_array[i];
+            }
+            else if (distance(X, Y, this->point_array[i].new_x, this->point_array[i].new_y) == distance(X, Y, nearest->new_x, nearest->new_y))
+            {
+                if (this->point_array[i].new_x == nearest->new_x)
                 {
-                    nearest.new_x = point_array[i].new_x;
-                    nearest.new_y = point_array[i].new_y;
+                    if (this->point_array[i].new_y > nearest->new_y)
+                    {
+                        nearest = &point_array[i];
+                    }
+                }
+                else if (this->point_array[i].new_x > nearest->new_x)
+                {
+                    nearest = &point_array[i];
                 }
             }
-            else if (abs((this->point_array[i].new_x - X)) < abs((nearest.new_x - X)) && abs((this->point_array[i].new_y - Y)) < abs((nearest.new_y - Y)))
+
+            else if (distance(X, Y, this->point_array[i].new_x, this->point_array[i].new_y) < distance(X, Y, nearest->new_x, nearest->new_y))
             {
-                nearest.new_x = point_array[i].new_x;
-                nearest.new_y = point_array[i].new_y;
+                nearest = &point_array[i];
             }
         }
     }
@@ -221,8 +223,8 @@ bool Quadtree::range(double xr0, double yr0, double xr1, double yr1)
     {
         if (this->new_leaf_RT->range(xr0, yr0, xr1, yr1)) {hold++;}
         if (this->new_leaf_LT->range(xr0, yr0, xr1, yr1)) {hold++;}
-        if (this->new_leaf_LB->range(xr0, yr0, xr1, yr1)) {hold++;}
         if (this->new_leaf_RB->range(xr0, yr0, xr1, yr1)) {hold++;}
+        if (this->new_leaf_LB->range(xr0, yr0, xr1, yr1)) {hold++;}
         
         //if (this->new_leaf_RT->range(xr0, yr0, xr1, yr1) || this->new_leaf_LT->range(xr0, yr0, xr1, yr1) || this->new_leaf_RB->range(xr0, yr0, xr1, yr1) || this->new_leaf_LB->range(xr0, yr0, xr1, yr1))
         if (hold > 0)
@@ -266,4 +268,10 @@ bool Quadtree::is_in_range(double xr0, double yr0, double xr1, double yr1)
         throw illegal_exception();
         return false;
     }
+}
+//-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------//
+double Quadtree::distance(double x0, double y0, double x1, double y1)
+{
+    dist = sqrt(pow((x1-x0),2) + pow((y1-y0), 2));
+    return dist;
 }
