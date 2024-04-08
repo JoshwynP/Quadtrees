@@ -63,19 +63,46 @@ To use this Quadtree implementation in your C++ project, follow these steps:
 2. Include the necessary header files in your project.
 3. Instantiate a `Quadtree` object and use its methods to perform desired operations on points.
 
-## Example Usage
+## Example Terminal Input
 
 ```cpp
-// Example usage of Quadtree implementation
-#include <iostream>
-#include "Quadtree.h"
+INIT 9 0 0 16 16
+INSERT 1 1
+INSERT 1 2
+INSERT 1 3
+INSERT 1 4
+INSERT 1 5
+INSERT 1 6
+INSERT 1 7
+INSERT 1 8
+INSERT 1 9
+INSERT 1 10
+INSERT 1 11
+INSERT 1 12
+INSERT 1 13
+INSERT 1 14
+INSERT 1 15
+RANGE 0 0 4 4
+EXIT
+```
 
-int main() {
-    Quadtree quadtree(4, 0, 0, 100, 100);
-    quadtree.insert(10, 20);
-    quadtree.insert(30, 40);
-    quadtree.insert(50, 60);
-    quadtree.insert(70, 80);
-    // Perform other operations...
-    return 0;
-}
+## Example Terminal Output
+
+```cpp
+success
+success
+success
+success
+success
+success
+success
+success
+success
+success
+success
+success
+success
+success
+success
+success
+1 1 1 2 1 3
